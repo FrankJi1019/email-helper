@@ -1,0 +1,31 @@
+{
+  "name": "service-functions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:create": "esbuild src/email-helper-create.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-create/index.js",
+    "deploy:create": "cd dist/email-helper-create && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-create --zip-file fileb://function.zip",
+    "build:dispatch": "esbuild src/email-helper-dispatch.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-dispatch/index.js",
+    "deploy:dispatch": "cd dist/email-helper-dispatch && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-dispatch --zip-file fileb://function.zip"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1083.0",
+    "@aws-sdk/client-scheduler": "^3.1083.0",
+    "@aws-sdk/client-sesv2": "^3.1089.0",
+    "@aws-sdk/lib-dynamodb": "^3.1083.0",
+    "@types/aws-lambda": "^8.10.162",
+    "aws-lambda": "^1.0.7",
+    "crypto": "^1.0.1",
+    "zod": "^4.4.3"
+  }
+}
