@@ -9,7 +9,8 @@
     "build:create": "esbuild src/email-helper-create.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-create/index.js",
     "deploy:create": "cd dist/email-helper-create && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-create --zip-file fileb://function.zip",
     "build:dispatch": "esbuild src/email-helper-dispatch.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-dispatch/index.js",
-    "deploy:dispatch": "cd dist/email-helper-dispatch && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-dispatch --zip-file fileb://function.zip"
+    "deploy:dispatch": "cd dist/email-helper-dispatch && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-dispatch --zip-file fileb://function.zip",
+    "deploy:email-template": "npx tsx ./src/email-template/deploy.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1083.0",
     "@aws-sdk/client-scheduler": "^3.1083.0",
+    "@aws-sdk/client-ses": "^3.1090.0",
     "@aws-sdk/client-sesv2": "^3.1089.0",
     "@aws-sdk/lib-dynamodb": "^3.1083.0",
     "@types/aws-lambda": "^8.10.162",

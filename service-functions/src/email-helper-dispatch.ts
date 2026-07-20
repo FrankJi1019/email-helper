@@ -1,12 +1,13 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 import { z } from 'zod'
-import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+import { SendTemplatedEmailCommand, SESClient } from '@aws-sdk/client-ses';
 
 const DYNAMODB_TABLE_NAME = "scheduled-emails" as const
 const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient())
-const ses = new SESv2Client()
-const FROM_EMAIL_ADDRESS = "frankjishiyuan@gmail.com"
+const ses = new SESClient()
+const FROM_EMAIL_ADDRESS = "noreply@frankji.com"
+const EMAIL_TEMPLATE_NAME = "ScheduledEmailNotification"
 
 const IdPayloadSchema = z.object({
     id: z.uuid(),
@@ -53,19 +54,16 @@ export const handler = async (event: unknown) => {
     const { subject, body, toEmail } = result.Item
 
     try {
-        await ses.send(new SendEmailCommand({
-            FromEmailAddress: FROM_EMAIL_ADDRESS,
+        await ses.send(new SendTemplatedEmailCommand({
+            Source: FROM_EMAIL_ADDRESS,
             Destination: {
-                ToAddresses: [toEmail],
+                ToAddresses: [toEmail]
             },
-            Content: {
-                Simple: {
-                    Subject: { Data: subject },
-                    Body: {
-                        Text: { Data: body }
-                    }
-                }
-            }
+            Template: EMAIL_TEMPLATE_NAME,
+            TemplateData: JSON.stringify({
+                SUBJECT: subject,
+                CONTENT: body
+            })
         }))
         await updateStatus(id, "DISPATCHED")
     } catch (err) {
