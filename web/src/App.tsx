@@ -1,14 +1,16 @@
-import type { FC } from "react"
+import { useMemo, type FC } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import { Routes as AppRoutes } from "./routes/routes"
 import { useAuth } from "./providers/AuthProvider"
 import LoginPageBuilder from "./pages/LoginPage"
-import SchedulePage from "./pages/SchedulePage"
-import MessagesPage from "./pages/MessagesPage"
+import SchedulePageBuilder from "./pages/SchedulePage"
+import MessagesPageBuilder from "./pages/MessagesPage"
 import AppShell from "./containers/AppShell"
 
 const App: FC = () => {
-  const { isAuthenticated } = useAuth()
+  const { userDetail } = useAuth()
+
+  const isAuthenticated = useMemo(() => !!userDetail, [userDetail])
 
   if (!isAuthenticated) {
     return (
@@ -22,8 +24,8 @@ const App: FC = () => {
   return (
     <AppShell>
       <Routes>
-        <Route path={AppRoutes.SCHEDULE.path} element={<SchedulePage />} />
-        <Route path={AppRoutes.MESSAGES.path} element={<MessagesPage />} />
+        <Route path={AppRoutes.SCHEDULE.path} element={<SchedulePageBuilder />} />
+        <Route path={AppRoutes.MESSAGES.path} element={<MessagesPageBuilder />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </AppShell>

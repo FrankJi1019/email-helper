@@ -1,10 +1,10 @@
-import { useState } from "react"
-import type { FC } from "react"
+import { useCallback, useState } from "react"
+import type { FC, SyntheticEvent } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEnvelopeOpenText } from "@fortawesome/free-solid-svg-icons"
 
 export interface LoginPageProps {
-  onLogin: (email: string) => void
+  onLogin: (email: string, password: string) => Promise<void>
 }
 
 const fieldClass = (hasError: boolean): string =>
@@ -21,35 +21,10 @@ const LoginPage: FC<LoginPageProps> = ({ onLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({})
 
-  const validate = (): boolean => {
-    const newErrors: typeof errors = {}
-
-    if (!email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!email.includes("@")) {
-      newErrors.email = "Enter a valid email address"
-    }
-
-    if (!password.trim()) {
-      newErrors.password = "Password is required"
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
-    }
-
-    if (isSignUp && password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: SyntheticEvent) => {
     e.preventDefault()
-    if (validate()) {
-      onLogin(email.trim())
-    }
-  }
+    await onLogin(email.trim(), password)
+  }, [onLogin, email, password])
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-white to-ads-neutral flex flex-col items-center px-4 py-12 overflow-hidden">

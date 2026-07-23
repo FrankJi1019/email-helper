@@ -21,7 +21,6 @@ const MaskedInput: FC<MaskedInputProps> = ({ type, value, onChange, id, hasError
   const mask = MASKS[type]
 
   const applyMask = useCallback((raw: string): string => {
-    // Strip non-digits
     const digits = raw.replace(/\D/g, "")
     const parts: string[] = []
     let offset = 0
@@ -42,11 +41,9 @@ const MaskedInput: FC<MaskedInputProps> = ({ type, value, onChange, id, hasError
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow navigation keys, backspace, delete, tab
     const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"]
     if (allowedKeys.includes(e.key)) return
 
-    // Only allow digits
     if (!/^\d$/.test(e.key)) {
       e.preventDefault()
     }
@@ -63,10 +60,10 @@ const MaskedInput: FC<MaskedInputProps> = ({ type, value, onChange, id, hasError
       onKeyDown={handleKeyDown}
       placeholder={mask.placeholder}
       maxLength={mask.maxLength}
-      className={`w-full h-10 px-3 rounded-md border bg-white text-sm text-ads-text placeholder:text-ads-disabled outline-none transition-all focus:ring-2 font-mono tracking-wider ${
+      className={`w-full h-11 px-4 rounded-xl border bg-white/80 backdrop-blur-sm text-sm text-ads-text placeholder:text-ads-disabled outline-none transition-all duration-200 focus:ring-2 focus:bg-white font-mono tracking-wider ${
         hasError
-          ? "border-ads-red focus:ring-ads-red/20"
-          : "border-ads-border focus:border-ads-blue focus:ring-ads-blue/20"
+          ? "border-ads-red/60 focus:ring-ads-red/20 focus:border-ads-red"
+          : "border-slate-200/80 focus:border-ads-blue focus:ring-ads-blue/20"
       }`}
     />
   )

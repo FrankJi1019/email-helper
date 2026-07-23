@@ -2,9 +2,9 @@ import { createContext, useCallback, useContext, useState } from "react"
 import type { FC } from "react"
 import type { ProviderProps } from "../types/props"
 import type { ScheduledMessage } from "../types/domain"
+import { MESSAGE_STATUS } from "../types/domain"
 
-interface ScheduleData {
-  type: "email" | "text"
+export interface ScheduleData {
   recipient: string
   subject: string
   body: string
@@ -24,43 +24,30 @@ interface MessagesContextValue {
 const SAMPLE_MESSAGES: ScheduledMessage[] = [
   {
     id: "1",
-    type: "email",
     recipient: "alice@example.com",
     subject: "Weekly standup notes",
     body: "Hi Alice, here are the notes from today's standup. Let me know if I missed anything.",
-    scheduledAt: "2026-07-10T09:00",
-    status: "pending",
-    createdAt: "2026-07-07T14:00",
+    scheduledAt: new Date("2026-07-10T09:00"),
+    status: MESSAGE_STATUS.PENDING,
+    createdAt: new Date("2026-07-07T14:00"),
   },
   {
     id: "2",
-    type: "text",
-    recipient: "+64 21 555 1234",
-    subject: "",
-    body: "Don't forget to pick up milk on your way home!",
-    scheduledAt: "2026-07-08T17:30",
-    status: "pending",
-    createdAt: "2026-07-07T10:00",
-  },
-  {
-    id: "3",
-    type: "email",
     recipient: "team@company.co",
     subject: "Sprint retro reminder",
     body: "Hey team, just a reminder that our sprint retro is tomorrow at 3pm. Please come prepared with your feedback.",
-    scheduledAt: "2026-07-05T14:00",
-    status: "sent",
-    createdAt: "2026-07-04T09:00",
+    scheduledAt: new Date("2026-07-05T14:00"),
+    status: MESSAGE_STATUS.DISPATCHED,
+    createdAt: new Date("2026-07-04T09:00"),
   },
   {
-    id: "4",
-    type: "text",
-    recipient: "+1 555 777 8888",
-    subject: "",
-    body: "Your appointment is confirmed for Thursday 10am. Reply STOP to cancel.",
-    scheduledAt: "2026-07-09T08:00",
-    status: "pending",
-    createdAt: "2026-07-06T16:30",
+    id: "3",
+    recipient: "bob@example.com",
+    subject: "Catch up this week?",
+    body: "Hey Bob, are you free for a coffee catch-up this week? Would love to hear how the new project is going.",
+    scheduledAt: new Date("2026-07-09T08:00"),
+    status: MESSAGE_STATUS.PENDING,
+    createdAt: new Date("2026-07-06T16:30"),
   },
 ]
 
@@ -81,16 +68,19 @@ const MessagesProvider: FC<ProviderProps> = ({ children }) => {
   const scheduleMessage = useCallback((data: ScheduleData) => {
     const newMessage: ScheduledMessage = {
       id: crypto.randomUUID(),
-      ...data,
-      status: "pending",
-      createdAt: new Date().toISOString(),
+      recipient: data.recipient,
+      subject: data.subject,
+      body: data.body,
+      scheduledAt: new Date(data.scheduledAt),
+      status: MESSAGE_STATUS.PENDING,
+      createdAt: new Date(),
     }
     setMessages((prev) => [...prev, newMessage])
   }, [])
 
   const updateMessage = useCallback((id: string, data: ScheduleData) => {
     setMessages((prev) =>
-      prev.map((msg) => msg.id === id ? { ...msg, ...data } : msg)
+      prev.map((msg) => msg.id === id ? { ...msg, recipient: data.recipient, subject: data.subject, body: data.body, scheduledAt: new Date(data.scheduledAt) } : msg)
     )
     setEditingMessage(null)
   }, [])

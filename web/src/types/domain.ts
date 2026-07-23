@@ -1,14 +1,22 @@
-export type MessageType = "email" | "text"
+export const MESSAGE_STATUS = {
+  PENDING: "PENDING",
+  DISPATCHED: "DISPATCHED",
+  FAILED: "FAILED",
+} as const 
 
-export type MessageStatus = "pending" | "sent"
+export type MessageStatus = (typeof MESSAGE_STATUS)[keyof typeof MESSAGE_STATUS]
 
 export interface ScheduledMessage {
   id: string
-  type: MessageType
   recipient: string
   subject: string
   body: string
-  scheduledAt: string
+  scheduledAt: Date
   status: MessageStatus
-  createdAt: string
+  createdAt: Date
+}
+
+export interface UserDetail {
+  email: string
+  username: string
 }

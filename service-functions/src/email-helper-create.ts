@@ -1,4 +1,4 @@
-import { type APIGatewayProxyEventV2 } from "aws-lambda";
+import { type APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
 import {
     DynamoDBDocumentClient,
     PutCommand,
@@ -23,7 +23,7 @@ const PayloadSchema = z.object({
     toEmail: z.email()
 })
 
-export const handler = async (event: APIGatewayProxyEventV2) => {
+export const handler = async (event: APIGatewayProxyEventV2WithJWTAuthorizer) => {
 
     const parsedPayload = PayloadSchema.safeParse(JSON.parse(event.body ?? "{}"))
 
@@ -35,6 +35,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     }
 
     const { subject, body, sendAt, timezone, toEmail } = parsedPayload.data
+    const username = event.requestContext.authorizer.jwt.claims.username
 
     const id = randomUUID()
 
@@ -42,6 +43,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         TableName: DYNAMODB_TABLE_NAME,
         Item: {
             id, 
+            username,
             subject, 
             body, 
             sendAt, 

@@ -10,6 +10,10 @@
     "deploy:create": "cd dist/email-helper-create && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-create --zip-file fileb://function.zip",
     "build:dispatch": "esbuild src/email-helper-dispatch.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-dispatch/index.js",
     "deploy:dispatch": "cd dist/email-helper-dispatch && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-dispatch --zip-file fileb://function.zip",
+    "build:getall": "esbuild src/email-helper-get-all.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-get-all/index.js",
+    "deploy:getall": "cd dist/email-helper-get-all && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-get-all --zip-file fileb://function.zip",
+    "build:delete": "esbuild src/email-helper-delete.ts --bundle --platform=node --target=node22 --outfile=dist/email-helper-delete/index.js",
+    "deploy:delete": "cd dist/email-helper-delete && zip function.zip index.js && aws lambda update-function-code --function-name email-helper-delete --zip-file fileb://function.zip",
     "deploy:email-template": "npx tsx ./src/email-template/deploy.ts"
   },
   "keywords": [],

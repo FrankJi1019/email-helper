@@ -1,25 +1,38 @@
-import type { FC } from "react"
+import { useCallback, type FC } from "react"
 import { useNavigate } from "react-router-dom"
-import MessageQueue from "../../components/MessageQueue"
-import { useMessages } from "../../providers/MessagesProvider"
+import MessagesPage from "./MessagesPage"
 import { useNotification } from "../../providers/NotificationProvider"
+import {useFetchScheduledEmails, useDeleteScheduledEmail} from "../../api-hooks/scheduled-emails"
 
-const MessagesPage: FC = () => {
-  const { messages, deleteMessage, startEditing } = useMessages()
+const MessagesPageBuilder: FC = () => {
   const notify = useNotification()
   const navigate = useNavigate()
 
-  const handleDelete = (id: string) => {
-    deleteMessage(id)
+  const { data, refetch } = useFetchScheduledEmails()
+  const {mutateAsync} = useDeleteScheduledEmail()
+
+  const handleDelete = useCallback(async (id: string) => {
+    await mutateAsync({id})
+    await refetch()
     notify("Message deleted", { type: "error" })
-  }
+  }, [mutateAsync, notify, refetch])
 
   const handleEdit = (id: string) => {
-    startEditing(id)
+    console.log("edit", id)
     navigate("/")
   }
 
-  return <MessageQueue messages={messages} onDelete={handleDelete} onEdit={handleEdit} />
+  if (!data) {
+    return null
+  }
+
+  return (
+    <MessagesPage
+      messages={data}
+      onDelete={handleDelete}
+      onEdit={handleEdit}
+    />
+  )
 }
 
-export default MessagesPage
+export default MessagesPageBuilder

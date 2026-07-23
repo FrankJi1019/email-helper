@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import type { FC } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEnvelope, faComment, faClock, faPen, faTrash, faChevronDown } from "@fortawesome/free-solid-svg-icons"
+import { faEnvelope, faClock, faPen, faTrash, faChevronDown } from "@fortawesome/free-solid-svg-icons"
 import type { MessageStatus, ScheduledMessage } from "../../types/domain"
 
 export interface MessageItemProps {
@@ -11,14 +11,21 @@ export interface MessageItemProps {
   index?: number
 }
 
-const lozengeConfig: Record<MessageStatus, { label: string; styles: string }> = {
-  pending: {
+const statusConfig: Record<MessageStatus, { label: string; dot: string; text: string }> = {
+  PENDING: {
     label: "Pending",
-    styles: "bg-ads-yellow-subtle text-ads-yellow",
+    dot: "bg-amber-400 shadow-amber-400/50",
+    text: "text-amber-600",
   },
-  sent: {
+  DISPATCHED: {
     label: "Sent",
-    styles: "bg-ads-green-subtle text-ads-green",
+    dot: "bg-emerald-400 shadow-emerald-400/50",
+    text: "text-emerald-600",
+  },
+  FAILED: {
+    label: "Failed",
+    dot: "bg-red-400 shadow-red-400/50",
+    text: "text-red-600",
   },
 }
 
@@ -33,87 +40,94 @@ const MessageItem: FC<MessageItemProps> = ({ message, onDelete, onEdit, index = 
   }, [message.scheduledAt])
 
   const preview = useMemo(() => {
-    const text = message.type === "email" ? message.subject : message.body
-    return text.length > 60 ? text.slice(0, 60) + "…" : text
+    const text = message.subject || message.body
+    return text.length > 55 ? text.slice(0, 55) + "…" : text
   }, [message])
 
-  const isPending = message.status === "pending"
-  const lozenge = lozengeConfig[message.status]
+  const isPending = message.status === "PENDING"
+  const status = statusConfig[message.status]
 
   return (
     <div
-      className="rounded-lg bg-white border border-ads-border shadow-[0_1px_2px_0_rgba(9,30,66,0.06)] overflow-hidden transition-all duration-200 hover:shadow-[0_6px_16px_-6px_rgba(9,30,66,0.18)] hover:-translate-y-0.5 hover:border-ads-blue/30 animate-fade-up"
-      style={{ animationDelay: `${index * 55}ms` }}
+      className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/60 shadow-[0_2px_8px_-2px_rgba(9,30,66,0.08),0_0_0_1px_rgba(9,30,66,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_-8px_rgba(9,30,66,0.14),0_0_0_1px_rgba(9,30,66,0.04)] hover:-translate-y-0.5 animate-fade-up"
+      style={{ animationDelay: `${80 + index * 50}ms` }}
     >
       {/* Header row */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3.5 flex items-center gap-3 text-left hover:bg-ads-neutral/60 transition-colors"
+        className="w-full px-5 py-4 flex items-center gap-4 text-left transition-colors hover:bg-slate-50/40"
         aria-expanded={isExpanded}
       >
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-ads-blue-subtle to-[#b3d4ff] text-ads-blue flex items-center justify-center shrink-0 shadow-sm shadow-ads-blue/10">
-          <FontAwesomeIcon icon={message.type === "email" ? faEnvelope : faComment} className="text-sm" />
+        {/* Icon */}
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ads-blue-subtle to-blue-100 text-ads-blue flex items-center justify-center shrink-0 shadow-sm shadow-ads-blue/10 ring-1 ring-white/60">
+          <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
         </div>
 
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2.5 mb-0.5">
             <span className="text-sm font-semibold text-ads-text truncate">{message.recipient}</span>
-            <span className={`inline-flex items-center text-[11px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded shrink-0 ${lozenge.styles}`}>
-              {lozenge.label}
+            <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider shrink-0 ${status.text}`}>
+              <span className={`w-1.5 h-1.5 rounded-full shadow-sm ${status.dot}`} />
+              {status.label}
             </span>
           </div>
           <p className="text-xs text-ads-subtle truncate">{preview}</p>
         </div>
 
+        {/* Date + chevron */}
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-xs text-ads-subtle hidden sm:block">{formattedDate}</span>
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            className={`text-xs text-ads-subtle transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-          />
+          <span className="text-[11px] text-ads-disabled hidden sm:block font-medium">{formattedDate}</span>
+          <div className={`w-6 h-6 rounded-lg bg-slate-100/80 flex items-center justify-center transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
+            <FontAwesomeIcon icon={faChevronDown} className="text-[10px] text-ads-subtle" />
+          </div>
         </div>
       </button>
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="px-4 pb-4">
-          <div className="border-t border-ads-border pt-4 space-y-3">
-            <p className="text-xs text-ads-subtle sm:hidden flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faClock} className="text-xs" />
+        <div className="px-5 pb-5">
+          <div className="border-t border-slate-100 pt-4 space-y-4 ml-14">
+            {/* Date on mobile */}
+            <p className="text-[11px] text-ads-subtle sm:hidden flex items-center gap-2 font-medium">
+              <FontAwesomeIcon icon={faClock} className="text-[10px]" />
               {formattedDate}
             </p>
 
-            {message.type === "email" && message.subject && (
+            {/* Subject */}
+            {message.subject && (
               <div>
-                <p className="text-xs font-semibold text-ads-subtle mb-0.5">Subject</p>
-                <p className="text-sm text-ads-text">{message.subject}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-ads-disabled mb-1">Subject</p>
+                <p className="text-sm text-ads-text font-medium">{message.subject}</p>
               </div>
             )}
 
+            {/* Body */}
             <div>
-              <p className="text-xs font-semibold text-ads-subtle mb-0.5">Message</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-ads-disabled mb-1">Message</p>
               <p className="text-sm text-ads-text whitespace-pre-wrap leading-relaxed">{message.body}</p>
             </div>
 
-            {isPending && (
-              <div className="flex items-center gap-2 pt-3 border-t border-ads-border">
+            {/* Actions */}
+            <div className="flex items-center gap-2 pt-3">
+              {isPending && (
                 <button
                   onClick={() => onEdit(message.id)}
-                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-sm font-medium text-ads-text hover:bg-ads-neutral transition-colors"
+                  className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-semibold text-ads-text bg-slate-100/80 hover:bg-slate-200/80 transition-all duration-150"
                 >
-                  <FontAwesomeIcon icon={faPen} className="text-xs" />
+                  <FontAwesomeIcon icon={faPen} className="text-[10px]" />
                   Edit
                 </button>
-                <button
-                  onClick={() => onDelete(message.id)}
-                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-sm font-medium text-ads-red hover:bg-ads-red-subtle transition-colors"
-                >
-                  <FontAwesomeIcon icon={faTrash} className="text-xs" />
-                  Delete
-                </button>
-              </div>
-            )}
+              )}
+              <button
+                onClick={() => onDelete(message.id)}
+                className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-semibold text-ads-red bg-ads-red-subtle/60 hover:bg-ads-red-subtle transition-all duration-150"
+              >
+                <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
