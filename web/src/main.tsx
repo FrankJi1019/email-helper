@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import AuthProvider from "./providers/AuthProvider"
 import NotificationProvider from "./providers/NotificationProvider"
-import MessagesProvider from "./providers/MessagesProvider"
 import App from "./App"
 import "./index.css"
 import { Amplify } from "aws-amplify"
@@ -27,11 +26,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <QueryClientProvider client={new QueryClient()}>
         <AuthProvider>
-          <MessagesProvider>
-            <NotificationProvider>
-              <App />
-            </NotificationProvider>
-          </MessagesProvider>
+          <NotificationProvider>
+            <App />
+          </NotificationProvider>
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

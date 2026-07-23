@@ -39,7 +39,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithJWTAuthorizer) =>
 
     const id = randomUUID()
 
-    await dynamodb.send(new PutCommand({
+    const createDynamodbPromise = dynamodb.send(new PutCommand({
         TableName: DYNAMODB_TABLE_NAME,
         Item: {
             id, 
@@ -54,7 +54,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithJWTAuthorizer) =>
         }
     }))
 
-    const schedule = await scheduler.send(new CreateScheduleCommand({
+    const createSchedulePromise = scheduler.send(new CreateScheduleCommand({
         Name: `email-helper-${id}`,
         ScheduleExpression: `at(${sendAt})`,
         ScheduleExpressionTimezone: timezone,
@@ -69,6 +69,8 @@ export const handler = async (event: APIGatewayProxyEventV2WithJWTAuthorizer) =>
         }
     }))
 
-    return schedule
+    await Promise.all([createDynamodbPromise, createSchedulePromise])
+
+    return { statusCode: 201 }
 
 }

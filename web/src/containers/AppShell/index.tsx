@@ -17,7 +17,7 @@ interface AppShellProps {
 
 const navItems: { label: string; path: string; icon: IconDefinition }[] = [
   { label: "Schedule", path: Routes.SCHEDULE.path, icon: faPenToSquare },
-  { label: "Messages", path: Routes.MESSAGES.path, icon: faListCheck },
+  { label: "Scheduled Emails", path: Routes.MESSAGES.path, icon: faListCheck },
 ]
 
 const AppShell: FC<AppShellProps> = ({ children }) => {

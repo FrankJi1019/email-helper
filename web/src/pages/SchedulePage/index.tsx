@@ -10,11 +10,11 @@ const SchedulePageBuilder: FC = () => {
   const { userDetail } = useAuth()
   const notify = useNotification()
 
-  const { mutateAsync } = useCreateScheduledEmail()
+  const { mutateAsync, isPending } = useCreateScheduledEmail()
 
   const handleSchedule = useCallback(async ({email, subject, body, date, time}: {
     email: string; subject: string; body: string; date: string; time: string
-  }) => {
+  }): Promise<boolean> => {
     const formattedDate = moment(date, "DD/MM/YYYY").format("YYYY-MM-DD")
     const datetime = `${formattedDate}T${time}`
     const payload: ScheduleEmailPayloadDto = {
@@ -23,14 +23,17 @@ const SchedulePageBuilder: FC = () => {
     try {
       await mutateAsync(payload)
       notify("Email scheduled", { type: "success" })
+      return true
     } catch {
       notify("ERROR: Failed to create", { type: "error" })
+      return false
     }
-  }, [mutateAsync])
+  }, [mutateAsync, notify])
 
   return (
     <SchedulePage
       profileEmail={userDetail?.email ?? ""}
+      isSubmitting={isPending}
       onSchedule={handleSchedule}
     />
   )

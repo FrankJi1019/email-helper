@@ -101,12 +101,6 @@ const LoginPage: FC<LoginPageProps> = ({ onLogin }) => {
             {isSignUp ? "Sign up" : "Log in"}
           </button>
         </form>
-
-        {!isSignUp && (
-          <button className="block mx-auto text-xs text-ads-blue hover:underline mt-4">
-            Can't log in?
-          </button>
-        )}
       </div>
 
       {/* Toggle */}

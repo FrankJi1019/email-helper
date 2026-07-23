@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react"
 import type { FC } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEnvelope, faClock, faPen, faTrash, faChevronDown } from "@fortawesome/free-solid-svg-icons"
+import { faEnvelope, faClock, faTrash, faChevronDown, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import type { MessageStatus, ScheduledMessage } from "../../types/domain"
 
-export interface MessageItemProps {
-  message: ScheduledMessage
+export interface ScheduledEmailItemProps {
+  scheduledEmail: ScheduledMessage
   onDelete: (id: string) => void
-  onEdit: (id: string) => void
+  isDeleting?: boolean
   index?: number
 }
 
@@ -29,27 +29,26 @@ const statusConfig: Record<MessageStatus, { label: string; dot: string; text: st
   },
 }
 
-const MessageItem: FC<MessageItemProps> = ({ message, onDelete, onEdit, index = 0 }) => {
+const ScheduledEmailItem: FC<ScheduledEmailItemProps> = ({ scheduledEmail, onDelete, isDeleting = false, index = 0 }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const formattedDate = useMemo(() => {
-    const d = new Date(message.scheduledAt)
+    const d = new Date(scheduledEmail.scheduledAt)
     return d.toLocaleDateString("en-NZ", { weekday: "short", month: "short", day: "numeric" }) +
       " · " +
       d.toLocaleTimeString("en-NZ", { hour: "2-digit", minute: "2-digit" })
-  }, [message.scheduledAt])
+  }, [scheduledEmail.scheduledAt])
 
   const preview = useMemo(() => {
-    const text = message.subject || message.body
+    const text = scheduledEmail.subject || scheduledEmail.body
     return text.length > 55 ? text.slice(0, 55) + "…" : text
-  }, [message])
+  }, [scheduledEmail])
 
-  const isPending = message.status === "PENDING"
-  const status = statusConfig[message.status]
+  const status = statusConfig[scheduledEmail.status]
 
   return (
     <div
-      className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/60 shadow-[0_2px_8px_-2px_rgba(9,30,66,0.08),0_0_0_1px_rgba(9,30,66,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_-8px_rgba(9,30,66,0.14),0_0_0_1px_rgba(9,30,66,0.04)] hover:-translate-y-0.5 animate-fade-up"
+      className={`bg-white/90 backdrop-blur-xl rounded-2xl border border-white/60 shadow-[0_2px_8px_-2px_rgba(9,30,66,0.08),0_0_0_1px_rgba(9,30,66,0.03)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_-8px_rgba(9,30,66,0.14),0_0_0_1px_rgba(9,30,66,0.04)] hover:-translate-y-0.5 animate-fade-up ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}
       style={{ animationDelay: `${80 + index * 50}ms` }}
     >
       {/* Header row */}
@@ -67,7 +66,7 @@ const MessageItem: FC<MessageItemProps> = ({ message, onDelete, onEdit, index = 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-0.5">
-            <span className="text-sm font-semibold text-ads-text truncate">{message.recipient}</span>
+            <span className="text-sm font-semibold text-ads-text truncate">{scheduledEmail.recipient}</span>
             <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider shrink-0 ${status.text}`}>
               <span className={`w-1.5 h-1.5 rounded-full shadow-sm ${status.dot}`} />
               {status.label}
@@ -96,36 +95,28 @@ const MessageItem: FC<MessageItemProps> = ({ message, onDelete, onEdit, index = 
             </p>
 
             {/* Subject */}
-            {message.subject && (
+            {scheduledEmail.subject && (
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-ads-disabled mb-1">Subject</p>
-                <p className="text-sm text-ads-text font-medium">{message.subject}</p>
+                <p className="text-sm text-ads-text font-medium">{scheduledEmail.subject}</p>
               </div>
             )}
 
             {/* Body */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-ads-disabled mb-1">Message</p>
-              <p className="text-sm text-ads-text whitespace-pre-wrap leading-relaxed">{message.body}</p>
+              <p className="text-sm text-ads-text whitespace-pre-wrap leading-relaxed">{scheduledEmail.body}</p>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-2 pt-3">
-              {isPending && (
-                <button
-                  onClick={() => onEdit(message.id)}
-                  className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-semibold text-ads-text bg-slate-100/80 hover:bg-slate-200/80 transition-all duration-150"
-                >
-                  <FontAwesomeIcon icon={faPen} className="text-[10px]" />
-                  Edit
-                </button>
-              )}
               <button
-                onClick={() => onDelete(message.id)}
-                className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-semibold text-ads-red bg-ads-red-subtle/60 hover:bg-ads-red-subtle transition-all duration-150"
+                onClick={() => onDelete(scheduledEmail.id)}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-semibold text-ads-red bg-ads-red-subtle/60 hover:bg-ads-red-subtle transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
-                Delete
+                <FontAwesomeIcon icon={isDeleting ? faSpinner : faTrash} className={`text-[10px] ${isDeleting ? "animate-spin" : ""}`} />
+                {isDeleting ? "Deleting…" : "Delete"}
               </button>
             </div>
           </div>
@@ -135,4 +126,4 @@ const MessageItem: FC<MessageItemProps> = ({ message, onDelete, onEdit, index = 
   )
 }
 
-export default MessageItem
+export default ScheduledEmailItem

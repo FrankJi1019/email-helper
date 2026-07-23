@@ -1,14 +1,15 @@
 import { useState } from "react"
 import type { FC } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faLock, faPaperPlane, faCalendarDays, faClock } from "@fortawesome/free-solid-svg-icons"
+import { faLock, faPaperPlane, faCalendarDays, faClock, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import MaskedInput from "../../components/MaskedInput"
 
 export interface SchedulePageProps {
   profileEmail: string
+  isSubmitting?: boolean
   onSchedule: (data: {
     email: string; subject: string; body: string; date: string; time: string
-  }) => void
+  }) => Promise<boolean>
 }
 
 const labelClass = "block text-[11px] font-semibold uppercase tracking-wide text-ads-subtle mb-2"
@@ -20,7 +21,7 @@ const fieldClass = (hasError: boolean): string =>
       : "border-slate-200/80 focus:border-ads-blue focus:ring-ads-blue/20"
   }`
 
-const SchedulePage: FC<SchedulePageProps> = ({ profileEmail, onSchedule }) => {
+const SchedulePage: FC<SchedulePageProps> = ({ profileEmail, isSubmitting = false, onSchedule }) => {
   const [subject, setSubject] = useState("")
   const [body, setBody] = useState("")
   const [date, setDate] = useState("")
@@ -50,11 +51,11 @@ const SchedulePage: FC<SchedulePageProps> = ({ profileEmail, onSchedule }) => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
-    onSchedule({
+    const isSuccess = await onSchedule({
       email: profileEmail,
       subject,
       body,
@@ -62,7 +63,9 @@ const SchedulePage: FC<SchedulePageProps> = ({ profileEmail, onSchedule }) => {
       time
     })
 
-    resetForm()
+    if (isSuccess) {
+      resetForm()
+    }
   }
 
   const resetForm = () => {
@@ -168,10 +171,11 @@ const SchedulePage: FC<SchedulePageProps> = ({ profileEmail, onSchedule }) => {
             <div className="flex items-center justify-end gap-3">
               <button
                 type="submit"
-                className="inline-flex items-center gap-2.5 h-10 px-6 rounded-xl bg-gradient-to-b from-ads-blue to-ads-blue-hover text-white text-sm font-semibold shadow-md shadow-ads-blue/25 hover:shadow-lg hover:shadow-ads-blue/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-150"
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-2.5 h-10 px-6 rounded-xl bg-gradient-to-b from-ads-blue to-ads-blue-hover text-white text-sm font-semibold shadow-md shadow-ads-blue/25 hover:shadow-lg hover:shadow-ads-blue/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-md"
               >
-                <FontAwesomeIcon icon={faPaperPlane} className="text-xs" />
-                Schedule email
+                <FontAwesomeIcon icon={isSubmitting ? faSpinner : faPaperPlane} className={`text-xs ${isSubmitting ? "animate-spin" : ""}`} />
+                {isSubmitting ? "Scheduling…" : "Schedule email"}
               </button>
             </div>
           </div>

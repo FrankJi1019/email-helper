@@ -4,7 +4,7 @@ import { Routes as AppRoutes } from "./routes/routes"
 import { useAuth } from "./providers/AuthProvider"
 import LoginPageBuilder from "./pages/LoginPage"
 import SchedulePageBuilder from "./pages/SchedulePage"
-import MessagesPageBuilder from "./pages/MessagesPage"
+import ScheduledEmailsPageBuilder from "./pages/ScheduledEmailsPage"
 import AppShell from "./containers/AppShell"
 
 const App: FC = () => {
@@ -25,7 +25,7 @@ const App: FC = () => {
     <AppShell>
       <Routes>
         <Route path={AppRoutes.SCHEDULE.path} element={<SchedulePageBuilder />} />
-        <Route path={AppRoutes.MESSAGES.path} element={<MessagesPageBuilder />} />
+        <Route path={AppRoutes.MESSAGES.path} element={<ScheduledEmailsPageBuilder />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </AppShell>
