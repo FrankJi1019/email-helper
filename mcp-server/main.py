@@ -18,6 +18,7 @@ auth_provider = AWSCognitoProvider(
     client_id=COGNITO_CLIENT_ID,
     client_secret=COGNITO_CLIENT_SECRET,
     base_url=BASE_URL,
+    require_authorization_consent="external",
 )
 
 mcp = FastMCP(name="EmailHelperMCP", auth=auth_provider)
