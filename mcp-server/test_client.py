@@ -1,9 +1,11 @@
 from fastmcp import Client
+from fastmcp.client.auth import OAuth
 import asyncio
 
 
 async def main():
-    async with Client("http://localhost:8000/mcp", auth="oauth") as client:
+    oauth = OAuth(callback_port=9999)
+    async with Client("https://mcp.email-helper.frankji.com/mcp", auth=oauth) as client:
         tools = await client.list_tools()
         print("Available tools:", [t.name for t in tools])
 
