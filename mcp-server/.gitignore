@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# uv
+.python-version
+
+# IDE
+.idea/
+.vscode/
+*.swp
