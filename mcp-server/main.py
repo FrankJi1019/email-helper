@@ -23,9 +23,10 @@ auth_provider = AWSCognitoProvider(
 
 mcp = FastMCP(name="EmailHelperMCP", auth=auth_provider)
 
-# Disable PKCE forwarding to Cognito — Cognito's PKCE handling with
-# confidential clients via proxy causes invalid_grant errors.
+# Disable PKCE and resource forwarding to Cognito — these cause
+# invalid_grant errors with Cognito's hosted UI.
 auth_provider._forward_pkce = False
+auth_provider._forward_resource = False
 
 register_tools(mcp)
 
