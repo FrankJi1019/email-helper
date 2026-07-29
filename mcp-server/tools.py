@@ -1,5 +1,7 @@
 """MCP tool definitions for the email-helper server."""
 
+from datetime import datetime, timezone
+
 import httpx
 from fastmcp import FastMCP
 from fastmcp.server.dependencies import get_access_token
@@ -20,6 +22,24 @@ def _get_username() -> str:
 
 def register_tools(mcp: FastMCP) -> None:
     """Register all MCP tools on the given server instance."""
+
+    @mcp.tool(name="get_current_time")
+    async def get_current_time(tz: str = "UTC"):
+        """Get the current date and time.
+
+        Args:
+            tz: IANA timezone string (e.g. "Pacific/Auckland", "America/New_York", "UTC").
+        """
+        try:
+            from zoneinfo import ZoneInfo
+            now = datetime.now(ZoneInfo(tz))
+            return {
+                "datetime": now.isoformat(),
+                "timezone": tz,
+                "unix_timestamp": int(now.timestamp()),
+            }
+        except Exception as e:
+            return {"error": f"Failed to get time: {str(e)}"}
 
     @mcp.tool(name="get_schedules")
     async def get_schedules():
